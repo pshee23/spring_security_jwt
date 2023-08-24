@@ -1,15 +1,20 @@
 package com.cos.jwt.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import com.cos.jwt.filter.MyFilter2;
+import com.cos.jwt.jwt.JwtAuthenticationFilter;
+import com.cos.jwt.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +22,12 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+	
+	@Autowired
+	private UserRepository userRepository;
+	
+	@Autowired
+	private CorsConfig corsConfig;
 
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -38,10 +49,24 @@ public class SecurityConfig {
 							   // header의 Authorization에 ID, PW를 담아 보내는 방법도 있음(httpBasic). 확장성은 좋으나 ID,PW가 노출됨
 							   // - https로 해서 보내면 숨겨짐. 
 							   // Authorization에 Token을 담아 보내는 방법도 있음(Bearer)(JWT). Token의 유효시간을 설정해야지 좋음
+		.apply(new MyCustomDsl()) // AthenticationManager 넘겨줘야 함.
+		.and()
 		.authorizeRequests()
 		.antMatchers("/api/v1/user/**").hasAnyRole("USER", "MANAGER", "ADMIN")
 		.antMatchers("/api/v1/manager/**").hasAnyRole("MANAGER", "ADMIN")
-		.antMatchers("/api/v1/admin/**").hasRole("ADMIN");
+		.antMatchers("/api/v1/admin/**").hasRole("ADMIN")
+		.anyRequest().permitAll();
 		return http.build();
+	}
+	
+	public class MyCustomDsl extends AbstractHttpConfigurer<MyCustomDsl, HttpSecurity> {
+		@Override
+		public void configure(HttpSecurity http) throws Exception {
+			AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+			http
+					.addFilter(corsConfig.corsFilter())
+					.addFilter(new JwtAuthenticationFilter(authenticationManager));
+//					.addFilter(new JwtAuthorizationFilter(authenticationManager, userRepository));
+		}
 	}
 }
