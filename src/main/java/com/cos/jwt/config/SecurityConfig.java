@@ -17,6 +17,10 @@ public class SecurityConfig {
 
 	@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		// SecurityChain에 직접 filter를 거는법. FilterConfig에서 설정하도록 변경됨.
+		// 다른 필터들 보다 여기 설정된 Filter가 가장 먼저 실행된다.  
+//		http.addFilterBefore(new MyFilter1(), SecurityContextPersistenceFilter.class); 
+		
 		// 서버에 인증정보를 저장하지 않기에 csrf를 사용하지 않는다.
 		http.csrf().disable();
 		// STATELESS: Session 기반의 인증기반을 사용하지 않음
