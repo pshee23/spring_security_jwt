@@ -95,11 +95,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		// HASH 암호 방식
 		String jwtToken = JWT.create()
 				.withSubject(principalDetails.getUsername()) // 토큰 이름
-				.withExpiresAt(new Date(System.currentTimeMillis() + (60000 * 10))) // 만료 시간 설정
+				.withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.EXPIRATION_TIME)) // 만료 시간 설정
 				.withClaim("id", principalDetails.getUser().getId()) 
 				.withClaim("username", principalDetails.getUser().getUsername())
-				.sign(Algorithm.HMAC512("cos"));
+				.sign(Algorithm.HMAC512(JwtProperties.SECRET));
 		
-		response.addHeader("Authorization", new StringBuilder().append("Bearer").append(" ").append(jwtToken).toString());
+		response.addHeader(JwtProperties.HEADER_STRING, new StringBuilder().append(JwtProperties.TOKEN_PREFIX).append(jwtToken).toString());
 	}
 }

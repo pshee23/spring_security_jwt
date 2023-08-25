@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import com.cos.jwt.filter.MyFilter2;
 import com.cos.jwt.jwt.JwtAuthenticationFilter;
+import com.cos.jwt.jwt.JwtAuthorizationFilter;
 import com.cos.jwt.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -65,8 +66,8 @@ public class SecurityConfig {
 			AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
 			http
 					.addFilter(corsConfig.corsFilter())
-					.addFilter(new JwtAuthenticationFilter(authenticationManager));
-//					.addFilter(new JwtAuthorizationFilter(authenticationManager, userRepository));
+					.addFilter(new JwtAuthenticationFilter(authenticationManager))
+					.addFilter(new JwtAuthorizationFilter(authenticationManager, userRepository));
 		}
 	}
 }
