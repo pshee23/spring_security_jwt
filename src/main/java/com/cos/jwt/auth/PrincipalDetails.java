@@ -8,6 +8,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.cos.jwt.model.User;
 
+import lombok.Data;
+
+@Data
 public class PrincipalDetails implements UserDetails {
 	private static final long serialVersionUID = 2712331137901752803L;
 	
